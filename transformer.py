@@ -15,9 +15,7 @@ SPLIT_RATIO = 0.9
 
 def feature_generator(datum):
 
-    if len(datum) != 2:
-        print(len(datum))
-    a, b = datum
+    a, b, l = datum
 
     # node feature
     a_in = indegree(a, matrix)
@@ -28,28 +26,41 @@ def feature_generator(datum):
     # neighbouring feature
     neighbour = common_neighbour(a, b, matrix)
     jac = jaccard(neighbour, a, b, matrix)
+    dice = dice_idx(neighbour, a, b, matrix)
     p_a = pref_attach(a, b, matrix)
     cos = cosine_sim(neighbour, p_a)
+    lhn = LHN(neighbour, p_a)
     adar = adamic_adar(a, b, matrix)
+    ra = resource_allocation(a, b, matrix)
+    reverse = reverse_link(a, b, matrix)
+    hp = hub_promoted(neighbour, a, b, matrix)
+    hd = hub_depressed(neighbour, a, b, matrix)
 
-        # path feature
-        #sim_r = sim_rank(a, b, matrix, 0)
+    # path feature
+    #sim_r = sim_rank(a, b, matrix, 0)
 
-        #X.append([a_in,a_out,b_in,b_out,neighbour,jac,p_a,cos,adar])
+    flow = propflow(a, b, matrix)
+    #print(flow)
+    #return flow
+    return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow,l]
 
-    return [a_in,a_out,b_in,b_out,neighbour,jac,p_a,cos,adar]
+def logger(res):
+    train_test.append(res)
+    if len(train_test) % (len(data)//100) == 0:
+        print("{:.2%} done".format(len(train_test)/len(data)))
 
 if __name__ ==  '__main__':
 
+    train_test = []
     print("start")
     pool = Pool(processes=4)
-    train_test = pool.map(feature_generator, [(d[0],d[1]) for d in data])
+    for item in data:
+        pool.apply_async(feature_generator, args=[item], callback=logger)
     pool.close()
+    pool.join()
     print("end")
 
-    labels = [d[2] for d in data]
-
-    X, y = np.array(train_test), np.array(labels)
+    X, y = np.array([d[:-1] for d in train_test]), np.array([d[-1] for d in train_test])
     print(X.shape, y.shape)
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=SPLIT_RATIO)
     X_train.dump("Xtrain")
