@@ -39,10 +39,10 @@ def feature_generator(datum):
     # path feature
     #sim_r = sim_rank(a, b, matrix, 0)
 
-    flow = propflow(a, b, matrix)
+    flow2, flow3 = propflow(a, b, matrix)
     #print(flow)
     #return flow
-    return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow,l]
+    return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow2,flow3,l]
 
 def logger(res):
     train_test.append(res)
@@ -54,6 +54,7 @@ if __name__ ==  '__main__':
     train_test = []
     print("start")
     pool = Pool(processes=4)
+    #pool = Pool()
     for item in data:
         pool.apply_async(feature_generator, args=[item], callback=logger)
     pool.close()
