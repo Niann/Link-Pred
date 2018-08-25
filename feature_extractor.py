@@ -1,4 +1,6 @@
 from math import log, sqrt
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 def indegree(node, matrix):
     cnt = 0
@@ -113,3 +115,22 @@ def propflow(a, b, matrix, level=3):
                             found.add(u)
                             new_search.append(u)
     return s1.get(b, 0), s2.get(b, 0)
+
+def recommend_vector(a,b,rec):
+    tA = rec["A"]
+    tB = rec["B"]
+    vi,vj = a,b
+    tempA = np.zeros(l);
+    tempB = np.zeros(l);
+    tempA[tA[vi]] = 1/len(tA[vi]);
+    for i in tB[vj]:
+        tempB[tA[i]] += 1/len(tB[vj])/len(tA[i]);
+    return cosine_similarity([tempA, tempB])[0][1]
+    
+    
+    
+    
+    
+    
+    
+    

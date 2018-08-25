@@ -11,6 +11,9 @@ with open("matrix.pickle","rb") as f:
 with open("raw.pickle","rb") as f:
     data = pickle.load(f)
 
+with open("recommend.pickle","rb") as f:
+    rec = pickle.load(f)
+
 SPLIT_RATIO = 0.9
 
 def feature_generator(datum):
@@ -40,6 +43,7 @@ def feature_generator(datum):
     #sim_r = sim_rank(a, b, matrix, 0)
 
     flow2, flow3 = propflow(a, b, matrix)
+    re = recommend_vector(a,b,rec)
     #print(flow)
     #return flow
     return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow2,flow3,l]
