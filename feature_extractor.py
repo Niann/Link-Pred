@@ -80,7 +80,7 @@ def reverse_link(a, b, matrix):
 def sim_rank(a, b, matrix, level, gamma = 0.95):
     if a == b:
         return 1
-    if a not in matrix or b not in matrix or level >= 3:
+    if a not in matrix or b not in matrix or level >= 2:
         return 0
     s = 0
     for a_ in matrix[a]:
@@ -89,22 +89,27 @@ def sim_rank(a, b, matrix, level, gamma = 0.95):
                 s += gamma * sim_rank(a_, b_, matrix, level+1) / (len(matrix[a]) * len(matrix[b]))
     return s
 
-def propflow(a, b, matrix, l=2):
+def propflow(a, b, matrix, level=3):
     found = set([a])
     new_search = [a]
-    s = {a:1}
-    for _ in range(l):
+    s1 = {a:1}
+    s2 = {a:1}
+    for l in range(level):
         old_search = new_search.copy()
         new_search = []
         #print(len(old_search))
         while len(old_search) != 0:
             v = old_search.pop(0)
             if v in matrix:
-                node_input = s[v]
+                node_input = s2[v]
                 sum_output = len(matrix[v])
                 for u in matrix[v]:
-                    s[u] = s.get(u,0) + node_input * (1/sum_output)
-                    if u not in found:
-                        found.add(u)
-                        new_search.append(u)
-    return s.get(b, 0)
+                    if u in matrix or u == b:
+                        if l == 1 or u != b:
+                            s1[u] = s1.get(u,0) + node_input * (1/sum_output)
+                        if l > 0 or u != b:
+                            s2[u] = s2.get(u,0) + node_input * (1/sum_output)
+                        if u not in found:
+                            found.add(u)
+                            new_search.append(u)
+    return s1.get(b, 0), s2.get(b, 0)
