@@ -2,7 +2,6 @@ import numpy as np
 import pickle
 
 from feature_extractor import *
-from sklearn.model_selection import train_test_split
 from multiprocessing import Pool
 
 with open("matrix.pickle","rb") as f:
@@ -10,11 +9,6 @@ with open("matrix.pickle","rb") as f:
 
 with open("raw.pickle","rb") as f:
     data = pickle.load(f)
-
-with open("recommend.pickle","rb") as f:
-    rec = pickle.load(f)
-
-SPLIT_RATIO = 0.9
 
 def feature_generator(datum):
 
@@ -42,11 +36,10 @@ def feature_generator(datum):
     # path feature
     #sim_r = sim_rank(a, b, matrix, 0)
 
-    flow2, flow3 = propflow(a, b, matrix)
-    re = recommend_vector(a,b,rec)
+    flow2, flow3, flow4 = propflow(a, b, matrix)
     #print(flow)
     #return flow
-    return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow2,flow3,l]
+    return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow2,flow3,flow4,l]
 
 def logger(res):
     train_test.append(res)
@@ -58,17 +51,12 @@ if __name__ ==  '__main__':
     train_test = []
     print("start")
     pool = Pool(processes=4)
-    #pool = Pool()
     for item in data:
         pool.apply_async(feature_generator, args=[item], callback=logger)
     pool.close()
     pool.join()
     print("end")
 
-    X, y = np.array([d[:-1] for d in train_test]), np.array([d[-1] for d in train_test])
-    print(X.shape, y.shape)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=SPLIT_RATIO)
-    X_train.dump("Xtrain")
-    X_test.dump("Xtest")
-    y_train.dump("ytrain")
-    y_test.dump("ytest")
+    train_test = np.array(train_test)
+    print(train_test.shape)
+    train_test.dump("data.npy")

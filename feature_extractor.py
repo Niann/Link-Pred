@@ -1,6 +1,4 @@
 from math import log, sqrt
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 
 def indegree(node, matrix):
     cnt = 0
@@ -91,46 +89,49 @@ def sim_rank(a, b, matrix, level, gamma = 0.95):
                 s += gamma * sim_rank(a_, b_, matrix, level+1) / (len(matrix[a]) * len(matrix[b]))
     return s
 
-def propflow(a, b, matrix, level=3):
+def propflow(a, b, matrix, level=4):
+
     found = set([a])
     new_search = [a]
+
     s1 = {a:1}
     s2 = {a:1}
+    s3 = {a:1}
+
     for l in range(level):
+
         old_search = new_search.copy()
         new_search = []
         #print(len(old_search))
+
         while len(old_search) != 0:
             v = old_search.pop(0)
             if v in matrix:
-                node_input = s2[v]
-                sum_output = len(matrix[v])
+                node_input = s3[v]
+
+                # cut true flow
+                
+                if l == 0 and b in matrix[a]:
+                    sum_output = len(matrix[a]) - 1
+                else:
+                    sum_output = len(matrix[v])
+
                 for u in matrix[v]:
                     if u in matrix or u == b:
-                        if l == 1 or u != b:
-                            s1[u] = s1.get(u,0) + node_input * (1/sum_output)
-                        if l > 0 or u != b:
-                            s2[u] = s2.get(u,0) + node_input * (1/sum_output)
+                        # cut flow of true label
+                        if l == 0 and u == b:
+                            continue
+                        # second order flow
+                        if l < 2:
+                            s1[u] = s1.get(u,0) + node_input / sum_output
+                        # third order flow
+                        if l < 3:
+                            s2[u] = s2.get(u,0) + node_input / sum_output
+                        # fourth order flow
+                        s3[u] = s3.get(u,0) + node_input / sum_output
+
                         if u not in found:
                             found.add(u)
                             new_search.append(u)
-    return s1.get(b, 0), s2.get(b, 0)
 
-def recommend_vector(a,b,rec):
-    tA = rec["A"]
-    tB = rec["B"]
-    vi,vj = a,b
-    tempA = np.zeros(l);
-    tempB = np.zeros(l);
-    tempA[tA[vi]] = 1/len(tA[vi]);
-    for i in tB[vj]:
-        tempB[tA[i]] += 1/len(tB[vj])/len(tA[i]);
-    return cosine_similarity([tempA, tempB])[0][1]
-    
-    
-    
-    
-    
-    
-    
-    
+    return s1.get(b, 0), s2.get(b, 0), s3.get(b, 0)
