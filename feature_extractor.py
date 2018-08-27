@@ -110,7 +110,6 @@ def propflow(a, b, matrix, level=4):
                 node_input = s3[v]
 
                 # cut true flow
-                
                 if l == 0 and b in matrix[a]:
                     sum_output = len(matrix[a]) - 1
                 else:
@@ -135,3 +134,45 @@ def propflow(a, b, matrix, level=4):
                             new_search.append(u)
 
     return s1.get(b, 0), s2.get(b, 0), s3.get(b, 0)
+
+def propflow3(a, b, matrix, level=3):
+
+    found = set([a])
+    new_search = [a]
+
+    s1 = {a:1}
+    s2 = {a:1}
+
+    for l in range(level):
+
+        old_search = new_search.copy()
+        new_search = []
+        #print(len(old_search))
+
+        while len(old_search) != 0:
+            v = old_search.pop(0)
+            if v in matrix:
+                node_input = s2[v]
+
+                # cut true flow
+                if l == 0 and b in matrix[a]:
+                    sum_output = len(matrix[a]) - 1
+                else:
+                    sum_output = len(matrix[v])
+
+                for u in matrix[v]:
+                    if u in matrix or u == b:
+                        # cut flow of true label
+                        if l == 0 and u == b:
+                            continue
+                        # second order flow
+                        if l < 2:
+                            s1[u] = s1.get(u,0) + node_input / sum_output
+                        # third order flow
+                        s2[u] = s2.get(u,0) + node_input / sum_output
+
+                        if u not in found:
+                            found.add(u)
+                            new_search.append(u)
+
+    return s1.get(b, 0), s2.get(b, 0)

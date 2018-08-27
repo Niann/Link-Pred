@@ -12,7 +12,7 @@ with open("raw.pickle","rb") as f:
 
 def feature_generator(datum):
 
-    a, b, l = datum
+    id, a, b, l = datum
 
     # node feature
     a_in = indegree(a, matrix)
@@ -36,10 +36,10 @@ def feature_generator(datum):
     # path feature
     #sim_r = sim_rank(a, b, matrix, 0)
 
-    flow2, flow3, flow4 = propflow(a, b, matrix)
+    flow2, flow3 = propflow3(a, b, matrix)
     #print(flow)
     #return flow
-    return [a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow2,flow3,flow4,l]
+    return [id,a_in,a_out,b_in,b_out,neighbour,jac,dice,p_a,cos,lhn,adar,reverse,hp,hd,flow2,flow3,l]
 
 def logger(res):
     train_test.append(res)
