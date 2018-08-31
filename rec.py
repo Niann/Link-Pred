@@ -96,8 +96,11 @@ def sim(pair,tA,tB,l):
 l=len(new_set)
 res = {}
 for i in tqdm(new_test, ascii=True):
-    pair = new_test[i]
-    res[i] = sim(pair,tA,tB,l)
+    vi,vj = new_test[i]
+    res[i] = []
+#    res[i].append(sim([vi,vj],tA,tB,l))
+    res[i].append(sim([vj,vi],tB,tA,l))
+    
 
 with open("rec_sim.pickle","wb") as f:
     pickle.dump(res, f)
